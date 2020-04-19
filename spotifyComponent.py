@@ -1,17 +1,12 @@
 import sys
 import spotipy
 import spotipy.util as util
-import tracklistScraper
 
 QUERY_SPACE_PLACEHOLDER = " "
 QUERY_TYPE_TRACK = "&type=track"
 QUERY_FILTER_ARTIST = "artist:"
 QUERY_FILTER_TRACK = "track:"
 
-scope = 'playlist-modify-public'
-username = 'jlinsdell'
-
-token = util.prompt_for_user_token(username,scope)
 
 def getAllPlaylistNames(authToken):
     sp = spotipy.Spotify(auth=authToken)
@@ -84,31 +79,12 @@ def getTrackIDsFromTracklist(token,tracklist):
         trackIDs.append(trackID)
     return trackIDs
 
-# Print all playlists
-if token:
+def showAllPlaylistNamesandIDs(token):
     result = getAllPlaylistNamesandIDs(token)
     for name in result:
         print(name,result[name])
 
-tracklist = tracklistScraper.getTracklist()
-trackIDs = getTrackIDsFromTracklist(token,tracklist)
-print(trackIDs)
-
-#Add tracks to playlist
-playlist_id = '2dl4t2rD4lQ3PjpKKa27im'
-sp = spotipy.Spotify(auth=token)
-sp.user_playlist_add_tracks(username, playlist_id,trackIDs)
-
-
-
-# for track in tracklist:
-#     trackQuery = trackInfoToQuery(track)["trackName_noAmpersand"]
-#     print("my formatted query:",trackQuery)
-#     trackQueryResults = callTrackQuery(token,trackQuery)
-#     processQuery(trackQueryResults)
-
-
-# testquery = trackInfoToQueries("artist:Serge Devant & Damiano C Camille Safiya - track:Thinking Of You (Serge Devant Floor Cut)")["trackName_noAmpersand"]
-# print("test query:",testquery)
-# testqueryresults = callTrackQuery(token,testquery)
-# processQuery(testqueryresults)
+def addTracksToPlaylistID(token,username,playlist_id,trackIDs):
+    sp = spotipy.Spotify(auth=token)
+    sp.user_playlist_remove_all_occurrences_of_tracks(username, playlist_id,trackIDs)
+    sp.user_playlist_add_tracks(username, playlist_id,trackIDs)
