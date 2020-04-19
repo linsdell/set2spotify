@@ -70,13 +70,18 @@ def processQuery(queryResults):
     print("name of track:",queryResults['tracks']['items'][0]['name'])
     print("id of track:",queryResults['tracks']['items'][0]['id'])
 
+# TODO: add second query where it removes artist name between 'ft.' and '-'
+# TODO: investigate the importance of 'track:' in the query
 def getTrackIDsFromTracklist(token,tracklist):
     trackIDs = []
     for track in tracklist:
         trackQuery = trackInfoToQuery(track)["trackName_noAmpersand"]
         trackQueryResults = callTrackQuery(token,trackQuery)
-        trackID = trackQueryResults['tracks']['items'][0]['id']
-        trackIDs.append(trackID)
+        if(trackQueryResults['tracks']['total']!=0):
+            trackID = trackQueryResults['tracks']['items'][0]['id']
+            trackIDs.append(trackID)
+        else:
+            print("Error finding track:", track, "\n\tUsing query:", trackQuery)
     return trackIDs
 
 def showAllPlaylistNamesandIDs(token):
