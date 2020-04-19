@@ -2,6 +2,8 @@ import sys
 import spotipy
 import spotipy.util as util
 
+QUERY_SPACE_PLACEHOLDER = "%20"
+
 scope = 'playlist-read-private'
 username = 'jlinsdell'
 
@@ -21,8 +23,22 @@ def getAllPlaylistNames(authToken):
             allPlaylistNames.append(playlist['name'])
     return allPlaylistNames
 
+def trackInfoToQueries(trackInfo):
+    # Full track name just as it appears in the tracklist
+    trackName_Full = trackInfo.replace(" ",QUERY_SPACE_PLACEHOLDER)
+    # Full track name with no & in artist name
+    splitInfo = trackInfo.split(' - ')
+    artist = splitInfo[0].replace(" & ",QUERY_SPACE_PLACEHOLDER)
+    artist = artist.replace(" ",QUERY_SPACE_PLACEHOLDER)
+    trackName = splitInfo[1].replace(" ",QUERY_SPACE_PLACEHOLDER)
+    trackName_noAmpersand = artist + QUERY_SPACE_PLACEHOLDER +trackName
+    # Only track name, no artist
+    trackName_noArtist = trackName
+    return {"trackName_Full":trackName_Full,"trackName_noAmpersand":trackName_noAmpersand,"trackName_noArtist":trackName_noArtist}
 
 if token:
     result = getAllPlaylistNames(token)
     for name in result:
         print(name)
+
+print(trackInfoToQueries("David Hôhme & Dustin Nantais - The Predicament (Soulfeed Remix)")["trackName_noAmpersand"])
