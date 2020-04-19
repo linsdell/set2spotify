@@ -1,28 +1,30 @@
 import sys
 import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy.util as util
 
-scope = 'playlist-read-private'
-username = 'jlinsdell'
+scope = 'user-library-read'
 
-token = util.prompt_for_user_token(username,scope)
+if len(sys.argv)>1:
+    username = sys.argv[1]
+else:
+    print("Usage: %s username" % (sys.argv[0],))
+    sys.exit()
 
-def getAllPlaylistNames(authToken):
-    sp = spotipy.Spotify(auth=authToken)
-    allPlaylistNames = []
-    stillMorePlaylists = True
-    currentOffset = 0;
-    while stillMorePlaylists:
-        newPlaylists = sp.current_user_playlists(limit=50,offset = 50*currentOffset)
-        currentOffset += 1
-        if(len(newPlaylists['items'])<50):
-            stillMorePlaylists = False
-        for playlist in newPlaylists['items']:
-            allPlaylistNames.append(playlist['name'])
-    return allPlaylistNames
-
+token = util.prompt_for_user_token(username, scope)
 
 if token:
-    result = getAllPlaylistNames(token)
-    for name in result:
-        print(name)
+    sp = spotipy.Spotify(auth=token)
+    results = sp.current_user_saved_tracks()
+    for item in results['items']:
+        track = item['track']
+        print(track['name'] + ' - ' + track['artists'][0]['name'])
+else:
+    print("Can't get token for", username)
+
+# sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+
+# results = sp.search(q='weezer',limit=20)
+
+# for idx, track in enumerate(results['tracks']['items']):
+#     print(idx,track['name'])
