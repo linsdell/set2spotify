@@ -8,7 +8,7 @@ QUERY_TYPE_TRACK = "&type=track"
 QUERY_FILTER_ARTIST = "artist:"
 QUERY_FILTER_TRACK = "track:"
 
-scope = 'playlist-read-private'
+scope = 'playlist-modify-public'
 username = 'jlinsdell'
 
 token = util.prompt_for_user_token(username,scope)
@@ -26,6 +26,21 @@ def getAllPlaylistNames(authToken):
         for playlist in newPlaylists['items']:
             allPlaylistNames.append(playlist['name'])
     return allPlaylistNames
+
+def getAllPlaylistNamesandIDs(authToken):
+    sp = spotipy.Spotify(auth=authToken)
+    playlistDict = {}
+    stillMorePlaylists = True
+    currentOffset = 0;
+    while stillMorePlaylists:
+        newPlaylists = sp.current_user_playlists(limit=50,offset = 50*currentOffset)
+        currentOffset += 1
+        if(len(newPlaylists['items'])<50):
+            stillMorePlaylists = False
+        for playlist in newPlaylists['items']:
+            playlistDict[playlist['name']]=playlist['id']
+    return playlistDict
+
 
 def trackInfoToQuery(trackInfo):
     # Full track name just as it appears in the tracklist
@@ -70,14 +85,22 @@ def getTrackIDsFromTracklist(token,tracklist):
     return trackIDs
 
 # Print all playlists
-# if token:
-#     result = getAllPlaylistNames(token)
-#     for name in result:
-#         print(name)
+if token:
+    result = getAllPlaylistNamesandIDs(token)
+    for name in result:
+        print(name,result[name])
 
 tracklist = tracklistScraper.getTracklist()
 trackIDs = getTrackIDsFromTracklist(token,tracklist)
 print(trackIDs)
+
+#Add tracks to playlist
+playlist_id = '2dl4t2rD4lQ3PjpKKa27im'
+sp = spotipy.Spotify(auth=token)
+sp.user_playlist_add_tracks(username, playlist_id,trackIDs)
+
+
+
 # for track in tracklist:
 #     trackQuery = trackInfoToQuery(track)["trackName_noAmpersand"]
 #     print("my formatted query:",trackQuery)
